@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import {
-  Box, Typography, Button, TextField, Avatar, Stack,
+  Box, Typography, Button, TextField, Stack,
   Skeleton, MenuItem,
 } from '@mui/material';
 import { UploadFile as UploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
@@ -47,16 +47,18 @@ const grid3 = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px'
 
 function PanelHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <Box sx={{ px: '20px', py: '16px', borderBottom: '1px solid #E1E4EB' }}>
-      <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#131722' }}>{title}</Typography>
-      {subtitle && <Typography sx={{ fontSize: 12, color: '#6B7384', mt: 0.25 }}>{subtitle}</Typography>}
+    <Box sx={{ px: '20px', py: '16px', borderBottom: '1px solid #E1E4EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box>
+        <Typography sx={{ fontSize: 15, fontWeight: 600, color: '#131722' }}>{title}</Typography>
+        {subtitle && <Typography sx={{ fontSize: 12, color: '#6B7384', mt: '2px' }}>{subtitle}</Typography>}
+      </Box>
     </Box>
   );
 }
 
 function PanelFooter({ children }: { children: React.ReactNode }) {
   return (
-    <Box sx={{ px: '20px', py: '14px', bgcolor: '#F7F8FA', borderTop: '1px solid #E1E4EB', borderRadius: '0 0 12px 12px' }}>
+    <Box sx={{ px: '20px', py: '14px', bgcolor: '#F7F8FA', borderTop: '1px solid #E1E4EB', borderRadius: '0 0 12px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       {children}
     </Box>
   );
@@ -121,7 +123,7 @@ export default function CompanySettingsPage() {
             </Typography>
           </Box>
           <Stack direction="row" spacing={1}>
-            <Button variant="outlined" onClick={() => reset()} disabled={!isDirty} sx={{ color: '#6B7384', borderColor: '#E1E4EB' }}>
+            <Button variant="outlined" onClick={() => reset()} disabled={!isDirty} sx={{ borderColor: '#C9CFD9', color: '#131722' }}>
               Discard
             </Button>
             <Button variant="contained" type="submit" disabled={updateCompany.isPending}>
@@ -137,21 +139,27 @@ export default function CompanySettingsPage() {
         <Box sx={{ px: '20px', py: '20px' }}>
           {/* Logo Row */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, pb: 3, borderBottom: '1px solid #E1E4EB' }}>
-            <Avatar sx={{
-              width: 64, height: 64, fontSize: 22, fontWeight: 700,
+            {/* Brand mark preview: 48x48, teal gradient */}
+            <Box sx={{
+              width: 48, height: 48, borderRadius: '10px', flexShrink: 0,
               background: 'linear-gradient(135deg, #1D9E75 0%, #11644B 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 1px 3px rgba(19,23,34,.2)',
             }}>
-              AC
-            </Avatar>
+              <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#fff', lineHeight: 1 }}>A</Typography>
+            </Box>
             <Box>
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#131722', mb: 0.75 }}>Company logo</Typography>
-              <Stack direction="row" spacing={1}>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#131722', lineHeight: 1.3 }}>Acme</Typography>
+                <Typography sx={{ fontSize: 10, fontWeight: 800, color: '#6B7384', letterSpacing: '0.1em', textTransform: 'uppercase' }}>/ CORP.</Typography>
+              </Box>
+              <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
                 <Button variant="outlined" size="small" startIcon={<UploadIcon sx={{ fontSize: 14 }} />}
-                  sx={{ fontSize: 12, height: 30, borderColor: '#E1E4EB', color: '#4B5263' }}>
+                  sx={{ fontSize: 12, height: 30, borderColor: '#C9CFD9', color: '#131722' }}>
                   Upload logo
                 </Button>
                 <Button variant="text" size="small" startIcon={<DeleteIcon sx={{ fontSize: 14 }} />}
-                  sx={{ fontSize: 12, height: 30, color: '#DC2626' }}>
+                  sx={{ fontSize: 12, height: 30, color: '#DC2626', '&:hover': { bgcolor: '#FEE2E2' } }}>
                   Remove
                 </Button>
               </Stack>
