@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Box, Paper, Typography, Button, TextField, Avatar, Chip,
-  InputAdornment, IconButton, LinearProgress, Tabs, Tab,
+  InputAdornment, IconButton, LinearProgress,
 } from '@mui/material';
 import {
   Upload as UploadIcon, Visibility, VisibilityOff, Email as EmailIcon,
@@ -286,21 +286,30 @@ export default function ProfilePage() {
           <Button sx={{ fontSize: 12, fontWeight: 600, color: '#DC2626', '&:hover': { bgcolor: '#FEE2E2' } }}>Disable 2FA</Button>
         </Box>
         <Box sx={{ p: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <Tabs value={tfaTab} onChange={(_, v) => setTfaTab(v)}
-            sx={{ mt: '-4px', mx: '-20px', mb: '14px', minHeight: 40, borderBottom: '1px solid #E1E4EB', '& .MuiTab-root': { textTransform: 'none', fontSize: 13, fontWeight: 600, minHeight: 40, py: 1 } }}>
-            <Tab label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmailIcon sx={{ fontSize: 15 }} />Email OTP
-                <Chip label="Backup" size="small" sx={{ height: 18, fontSize: 10, fontWeight: 700, bgcolor: '#EEF0F4', color: '#353B4A', '& .MuiChip-label': { px: 0.75 } }} />
+          {/* Custom tab bar — no MUI Tabs */}
+          <Box sx={{ display: 'flex', borderBottom: '1px solid #E1E4EB', mx: '-20px', mb: '14px', px: '12px', mt: '-4px' }}>
+            {[
+              { idx: 0, icon: <EmailIcon sx={{ fontSize: 15 }} />, label: 'Email OTP', pill: { text: 'Backup', active: false } },
+              { idx: 1, icon: <SmartphoneIcon sx={{ fontSize: 15 }} />, label: 'Authenticator app', pill: { text: 'Primary', active: true } },
+            ].map(t => (
+              <Box key={t.idx} onClick={() => setTfaTab(t.idx)} sx={{
+                display: 'flex', alignItems: 'center', gap: 1, px: '12px', py: '10px', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, color: tfaTab === t.idx ? '#131722' : '#6B7384',
+                borderBottom: tfaTab === t.idx ? '2px solid #1A56DB' : '2px solid transparent',
+                mb: '-1px', userSelect: 'none',
+                '&:hover': { color: '#131722' },
+              }}>
+                {t.icon}
+                {t.label}
+                <Chip label={t.pill.text} size="small" sx={{
+                  height: 18, fontSize: 10, fontWeight: 700,
+                  bgcolor: t.pill.active && tfaTab === t.idx ? '#DBE6FD' : '#EEF0F4',
+                  color: t.pill.active && tfaTab === t.idx ? '#1745B0' : '#353B4A',
+                  '& .MuiChip-label': { px: 0.75 },
+                }} />
               </Box>
-            } />
-            <Tab label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SmartphoneIcon sx={{ fontSize: 15 }} />Authenticator app
-                <Chip label="Primary" size="small" sx={{ height: 18, fontSize: 10, fontWeight: 700, bgcolor: tfaTab === 1 ? '#DBE6FD' : '#EEF0F4', color: tfaTab === 1 ? '#1745B0' : '#353B4A', '& .MuiChip-label': { px: 0.75 } }} />
-              </Box>
-            } />
-          </Tabs>
+            ))}
+          </Box>
 
           {tfaTab === 1 && (
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>

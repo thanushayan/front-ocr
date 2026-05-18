@@ -136,7 +136,7 @@ export default function CompanySettingsPage() {
       {/* Identity Panel */}
       <Box sx={panelSx}>
         <PanelHeader title="Identity" subtitle="Branding that appears on documents and the portal." />
-        <Box sx={{ px: '20px', py: '20px' }}>
+        <Box sx={{ px: '20px', py: '18px' }}>
           {/* Logo Row */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, pb: 3, borderBottom: '1px solid #E1E4EB' }}>
             {/* Brand mark preview: 48x48, teal gradient */}
@@ -199,7 +199,7 @@ export default function CompanySettingsPage() {
       {/* Registered Address Panel */}
       <Box sx={panelSx}>
         <PanelHeader title="Registered address" subtitle="Used for official documents and HMRC compliance." />
-        <Box sx={{ px: '20px', py: '20px' }}>
+        <Box sx={{ px: '20px', py: '18px' }}>
           {isLoading ? (
             <Stack spacing={2}><Skeleton height={56} /><Skeleton height={56} /><Skeleton height={56} /></Stack>
           ) : (
@@ -238,7 +238,7 @@ export default function CompanySettingsPage() {
       {/* Defaults Panel */}
       <Box sx={panelSx}>
         <PanelHeader title="Defaults" subtitle="Regional and format preferences for new documents." />
-        <Box sx={{ px: '20px', py: '20px' }}>
+        <Box sx={{ px: '20px', py: '18px' }}>
           {isLoading ? (
             <Box sx={grid2}>{[...Array(4)].map((_, i) => <Skeleton key={i} height={56} />)}</Box>
           ) : (
@@ -267,8 +267,9 @@ export default function CompanySettingsPage() {
           )}
         </Box>
         <PanelFooter>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button variant="outlined" onClick={() => reset()} disabled={!isDirty} sx={{ color: '#6B7384', borderColor: '#E1E4EB' }}>
+          <Typography sx={{ fontSize: 11, color: '#6B7384' }}>Changes apply to new documents immediately.</Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" onClick={() => reset()} disabled={!isDirty} sx={{ borderColor: '#C9CFD9', color: '#131722' }}>
               Discard
             </Button>
             <Button variant="contained" type="submit" disabled={updateCompany.isPending}>
