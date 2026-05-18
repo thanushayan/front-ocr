@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Box, Paper, Typography, Button, TextField, Stack, Avatar, Chip,
+  Box, Paper, Typography, Button, TextField, Avatar, Chip,
   InputAdornment, IconButton, LinearProgress, Tabs, Tab,
 } from '@mui/material';
 import {
@@ -31,20 +31,6 @@ const Panel = ({ children }: { children: React.ReactNode }) => (
   <Paper sx={{ borderRadius: '12px', border: '1px solid #E1E4EB', boxShadow: '0 1px 2px rgba(19,23,34,.06)', overflow: 'hidden' }}>
     {children}
   </Paper>
-);
-const PanelHead = ({
-  title, sub, action,
-}: { title: React.ReactNode; sub?: string; action?: React.ReactNode }) => (
-  <Box sx={{ px: '20px', py: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #E1E4EB' }}>
-    <Box>
-      <Typography sx={{ fontSize: 15, fontWeight: 600, color: '#131722', display: 'flex', alignItems: 'center', gap: 1 }}>{title}</Typography>
-      {sub && <Typography sx={{ fontSize: 12, color: '#6B7384', mt: 0.25 }}>{sub}</Typography>}
-    </Box>
-    {action}
-  </Box>
-);
-const PanelBody = ({ children }: { children: React.ReactNode }) => (
-  <Box sx={{ p: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>{children}</Box>
 );
 const PanelFoot = ({ left, right }: { left: React.ReactNode; right: React.ReactNode }) => (
   <Box sx={{ px: '20px', py: '14px', borderTop: '1px solid #E1E4EB', bgcolor: '#F7F8FA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -84,7 +70,7 @@ function getPasswordStrength(pw: string) {
 }
 
 function QrCodePlaceholder() {
-  const cells = [];
+  const cells: React.ReactNode[] = [];
   for (let y = 0; y < 21; y++) {
     for (let x = 0; x < 21; x++) {
       const corner = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
@@ -102,21 +88,21 @@ function QrCodePlaceholder() {
 }
 
 export default function ProfilePage() {
-  const [tfaTab, setTfaTab] = useState(1); // 0=email, 1=totp
+  const [tfaTab, setTfaTab] = useState(1);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [newPw, setNewPw] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const { data: profile } = useProfile();
+  useProfile();
   const updateProfile = useUpdateProfile();
   const updatePassword = useUpdatePassword();
   const showSnack = useUIStore(s => s.showSnack);
 
   const profileForm = useForm<ProfileData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { fullName: profile?.name ?? 'Jordan Doe', preferredName: profile?.preferredName ?? 'Jordan' },
+    defaultValues: { fullName: 'Jordan Doe', preferredName: 'Jordan' },
   });
   const passwordForm = useForm<PasswordData>({ resolver: zodResolver(passwordSchema) });
 
@@ -125,12 +111,14 @@ export default function ProfilePage() {
     catch { showSnack('Failed to save profile', 'error'); }
   };
   const onSavePassword = async (vals: PasswordData) => {
-    try { await updatePassword.mutateAsync({ current: vals.current, newPassword: vals.newPassword }); showSnack('Password updated', 'success'); passwordForm.reset(); }
-    catch { showSnack('Failed to update password', 'error'); }
+    try {
+      await updatePassword.mutateAsync({ current: vals.current, newPassword: vals.newPassword });
+      showSnack('Password updated', 'success');
+      passwordForm.reset();
+    } catch { showSnack('Failed to update password', 'error'); }
   };
 
   const strength = getPasswordStrength(newPw);
-
   const RECOVERY_CODES = ['4f3a-9b2c','8e1d-7c5a','2k9p-1m4t','6r8q-3v7w','•••• - ••••','•••• - ••••'];
 
   return (
@@ -150,22 +138,25 @@ export default function ProfilePage() {
 
       {/* Identity */}
       <Panel>
-        <PanelHead title="Identity" sub="Your name and email · visible across the workspace." />
+        <Box sx={{ px: '20px', py: '16px', borderBottom: '1px solid #E1E4EB' }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 600, color: '#131722' }}>Identity</Typography>
+          <Typography sx={{ fontSize: 12, color: '#6B7384', mt: 0.25 }}>Your name and email · visible across the workspace.</Typography>
+        </Box>
         <Box component="form" onSubmit={profileForm.handleSubmit(onSaveProfile)}>
-          <PanelBody>
+          <Box sx={{ p: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Avatar row */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '18px', pb: '14px', borderBottom: '1px solid #E1E4EB' }}>
               <Avatar sx={{ width: 64, height: 64, bgcolor: '#1A56DB', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>JD</Avatar>
               <Box>
                 <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#353B4A' }}>Profile photo</Typography>
                 <Typography sx={{ fontSize: 11, color: '#6B7384', mt: 0.25 }}>PNG, JPG · max 2 MB · auto-cropped to a circle</Typography>
-                <Stack direction="row" sx={{ gap: 1, mt: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                   <Button variant="outlined" size="small" startIcon={<UploadIcon sx={{ fontSize: 14 }} />}
                     sx={{ height: 30, fontSize: 12, borderColor: '#C9CFD9', color: '#131722' }}>
                     Upload
                   </Button>
                   <Button sx={{ fontSize: 12, color: '#6B7384' }}>Use initials</Button>
-                </Stack>
+                </Box>
               </Box>
             </Box>
             <Grid2>
@@ -181,30 +172,21 @@ export default function ProfilePage() {
               </Field>
               <Field label="Email" readOnlyPill hint="Managed by your identity provider (Okta).">
                 <TextField size="small" defaultValue="jordan.doe@acmecorp.com"
-                  slotProps={{
-                    input: {
-                      readOnly: true,
-                      startAdornment: <InputAdornment position="start"><EmailIcon sx={{ fontSize: 16, color: '#6B7384' }} /></InputAdornment>,
-                      sx: { bgcolor: '#F7F8FA' },
-                    },
-                  }}
+                  slotProps={{ input: {
+                    readOnly: true,
+                    startAdornment: <InputAdornment position="start"><EmailIcon sx={{ fontSize: 16, color: '#6B7384' }} /></InputAdornment>,
+                    sx: { bgcolor: '#F7F8FA' },
+                  }}}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }} />
               </Field>
               <Field label="Role">
-                <Box sx={{
-                  display: 'flex', alignItems: 'center', height: 38, px: 1.5,
-                  border: '1px solid #C9CFD9', borderRadius: '8px', bgcolor: '#F7F8FA', fontSize: 13,
-                }}>
-                  <Box sx={{
-                    display: 'inline-flex', alignItems: 'center', fontSize: 11, fontWeight: 700,
-                    px: '9px', py: '3px', borderRadius: '999px',
-                    background: 'linear-gradient(135deg, #1A56DB, #15326E)', color: '#fff', mr: 1,
-                  }}>Owner</Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', height: 38, px: 1.5, border: '1px solid #C9CFD9', borderRadius: '8px', bgcolor: '#F7F8FA', fontSize: 13 }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', fontSize: 11, fontWeight: 700, px: '9px', py: '3px', borderRadius: '999px', background: 'linear-gradient(135deg, #1A56DB, #15326E)', color: '#fff', mr: 1 }}>Owner</Box>
                   <Typography sx={{ fontSize: 12, color: '#6B7384' }}>· all permissions</Typography>
                 </Box>
               </Field>
             </Grid2>
-          </PanelBody>
+          </Box>
           <PanelFoot
             left={<Typography sx={{ fontSize: 11, color: '#6B7384' }}>Last sign-in: 14 May 09:08 UTC · IP 82.34.108.12 · Chrome 134 / macOS</Typography>}
             right={<Button type="submit" variant="contained" size="small" disabled={updateProfile.isPending}>Save changes</Button>}
@@ -214,22 +196,23 @@ export default function ProfilePage() {
 
       {/* Password */}
       <Panel>
-        <PanelHead title="Password" sub="12 chars · 1 number · 1 symbol · not reused" />
+        <Box sx={{ px: '20px', py: '16px', borderBottom: '1px solid #E1E4EB' }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 600, color: '#131722' }}>Password</Typography>
+          <Typography sx={{ fontSize: 12, color: '#6B7384', mt: 0.25 }}>12 chars · 1 number · 1 symbol · not reused</Typography>
+        </Box>
         <Box component="form" onSubmit={passwordForm.handleSubmit(onSavePassword)}>
-          <PanelBody>
+          <Box sx={{ p: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <Grid2>
               <Field label="Current password">
                 <Controller name="current" control={passwordForm.control} render={({ field, fieldState }) => (
                   <TextField {...field} type={showCurrent ? 'text' : 'password'} size="small" error={!!fieldState.error}
-                    slotProps={{
-                      input: {
-                        endAdornment: <InputAdornment position="end">
-                          <IconButton size="small" onClick={() => setShowCurrent(p => !p)} edge="end">
-                            {showCurrent ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
-                          </IconButton>
-                        </InputAdornment>,
-                      },
-                    }}
+                    slotProps={{ input: {
+                      endAdornment: <InputAdornment position="end">
+                        <IconButton size="small" onClick={() => setShowCurrent(p => !p)} edge="end">
+                          {showCurrent ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                        </IconButton>
+                      </InputAdornment>,
+                    }}}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }} />
                 )} />
               </Field>
@@ -239,21 +222,18 @@ export default function ProfilePage() {
                   <Box>
                     <TextField {...field} type={showNew ? 'text' : 'password'} size="small" error={!!fieldState.error}
                       onChange={e => { field.onChange(e); setNewPw(e.target.value); }}
-                      slotProps={{
-                        input: {
-                          endAdornment: <InputAdornment position="end">
-                            <IconButton size="small" onClick={() => setShowNew(p => !p)} edge="end">
-                              {showNew ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
-                            </IconButton>
-                          </InputAdornment>,
-                        },
-                      }}
+                      slotProps={{ input: {
+                        endAdornment: <InputAdornment position="end">
+                          <IconButton size="small" onClick={() => setShowNew(p => !p)} edge="end">
+                            {showNew ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                          </IconButton>
+                        </InputAdornment>,
+                      }}}
                       sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }} fullWidth />
                     {newPw && (
                       <Box>
                         <LinearProgress variant="determinate" value={strength.pct}
-                          sx={{ mt: 1, height: 5, borderRadius: '999px', bgcolor: '#EEF0F4',
-                            '& .MuiLinearProgress-bar': { bgcolor: strength.color } }} />
+                          sx={{ mt: 1, height: 5, borderRadius: '999px', bgcolor: '#EEF0F4', '& .MuiLinearProgress-bar': { bgcolor: strength.color } }} />
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                           <Typography sx={{ fontSize: 11, fontWeight: 700, color: strength.color }}>{strength.label}</Typography>
                           <Typography sx={{ fontSize: 11, color: '#6B7384' }}>
@@ -267,24 +247,22 @@ export default function ProfilePage() {
               </Field>
               <Field label="Confirm new password">
                 <Controller name="confirm" control={passwordForm.control} render={({ field, fieldState }) => (
-                  <TextField {...field} type={showConfirm ? 'text' : 'password'} size="small" error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    slotProps={{
-                      input: {
-                        endAdornment: <InputAdornment position="end">
-                          {field.value && field.value === passwordForm.watch('newPassword')
-                            ? <CheckIcon sx={{ fontSize: 18, color: '#16A34A' }} />
-                            : <IconButton size="small" onClick={() => setShowConfirm(p => !p)} edge="end">
-                              {showConfirm ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
-                            </IconButton>}
-                        </InputAdornment>,
-                      },
-                    }}
+                  <TextField {...field} type={showConfirm ? 'text' : 'password'} size="small"
+                    error={!!fieldState.error} helperText={fieldState.error?.message}
+                    slotProps={{ input: {
+                      endAdornment: <InputAdornment position="end">
+                        {field.value && field.value === passwordForm.watch('newPassword')
+                          ? <CheckIcon sx={{ fontSize: 18, color: '#16A34A' }} />
+                          : <IconButton size="small" onClick={() => setShowConfirm(p => !p)} edge="end">
+                            {showConfirm ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                          </IconButton>}
+                      </InputAdornment>,
+                    }}}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: 13 } }} />
                 )} />
               </Field>
             </Grid2>
-          </PanelBody>
+          </Box>
           <PanelFoot
             left={<Typography sx={{ fontSize: 11, color: '#6B7384' }}>Last changed 42 days ago</Typography>}
             right={<Button type="submit" variant="contained" size="small" disabled={updatePassword.isPending}>Update password</Button>}
@@ -294,42 +272,31 @@ export default function ProfilePage() {
 
       {/* Two-factor authentication */}
       <Panel>
-        <PanelHead
-          title={
-            <>
-              <Box component="span" sx={{ display: 'inline-flex', mr: 0.5 }}>🛡</Box>
-              Two-factor authentication
+        <Box sx={{ px: '20px', py: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #E1E4EB' }}>
+          <Box>
+            <Typography sx={{ fontSize: 15, fontWeight: 600, color: '#131722', display: 'flex', alignItems: 'center', gap: 1 }}>
+              🛡 Two-factor authentication
               <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: '5px', ml: 1, fontSize: 10, fontWeight: 700, px: '9px', py: '3px', borderRadius: '999px', bgcolor: '#DCFCE7', color: '#166534', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#16A34A' }} />
                 Enabled
               </Box>
-            </>
-          }
-          sub="Adds a second step at sign-in · required by your workspace's security policy."
-          action={
-            <Button sx={{ fontSize: 12, fontWeight: 600, color: '#DC2626', '&:hover': { bgcolor: '#FEE2E2' } }}>
-              Disable 2FA
-            </Button>
-          }
-        />
-        <PanelBody>
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: '#6B7384', mt: 0.25 }}>Adds a second step at sign-in · required by your workspace's security policy.</Typography>
+          </Box>
+          <Button sx={{ fontSize: 12, fontWeight: 600, color: '#DC2626', '&:hover': { bgcolor: '#FEE2E2' } }}>Disable 2FA</Button>
+        </Box>
+        <Box sx={{ p: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <Tabs value={tfaTab} onChange={(_, v) => setTfaTab(v)}
-            sx={{
-              mt: '-4px', mx: '-20px', mb: '14px', minHeight: 40,
-              borderBottom: '1px solid #E1E4EB',
-              '& .MuiTab-root': { textTransform: 'none', fontSize: 13, fontWeight: 600, minHeight: 40, py: 1 },
-            }}>
+            sx={{ mt: '-4px', mx: '-20px', mb: '14px', minHeight: 40, borderBottom: '1px solid #E1E4EB', '& .MuiTab-root': { textTransform: 'none', fontSize: 13, fontWeight: 600, minHeight: 40, py: 1 } }}>
             <Tab label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmailIcon sx={{ fontSize: 15 }} />
-                Email OTP
+                <EmailIcon sx={{ fontSize: 15 }} />Email OTP
                 <Chip label="Backup" size="small" sx={{ height: 18, fontSize: 10, fontWeight: 700, bgcolor: '#EEF0F4', color: '#353B4A', '& .MuiChip-label': { px: 0.75 } }} />
               </Box>
             } />
             <Tab label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SmartphoneIcon sx={{ fontSize: 15 }} />
-                Authenticator app
+                <SmartphoneIcon sx={{ fontSize: 15 }} />Authenticator app
                 <Chip label="Primary" size="small" sx={{ height: 18, fontSize: 10, fontWeight: 700, bgcolor: tfaTab === 1 ? '#DBE6FD' : '#EEF0F4', color: tfaTab === 1 ? '#1745B0' : '#353B4A', '& .MuiChip-label': { px: 0.75 } }} />
               </Box>
             } />
@@ -337,7 +304,6 @@ export default function ProfilePage() {
 
           {tfaTab === 1 && (
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-              {/* Left: scan QR */}
               <Box>
                 <Box sx={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: '#1A56DB', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0, fontFamily: 'JetBrains Mono, monospace' }}>1</Box>
@@ -363,8 +329,6 @@ export default function ProfilePage() {
                   </Box>
                 </Box>
               </Box>
-
-              {/* Right: enter code */}
               <Box>
                 <Box sx={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: '#1A56DB', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0, fontFamily: 'JetBrains Mono, monospace' }}>2</Box>
@@ -376,12 +340,12 @@ export default function ProfilePage() {
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', mt: '12px' }}>
                   {['4','8','2','1','',''].map((v,i) => (
                     <Box key={i} sx={{
-                      height: 54, border: `1.5px solid ${v ? '#1A56DB' : i===4 ? '#1A56DB' : '#C9CFD9'}`,
+                      height: 54, border: `1.5px solid ${v || i===4 ? '#1A56DB' : '#C9CFD9'}`,
                       borderRadius: '8px', bgcolor: '#fff', display: 'grid', placeItems: 'center',
                       fontFamily: 'JetBrains Mono, monospace', fontSize: 22, fontWeight: 500,
                       boxShadow: i===4 ? '0 0 0 3px rgba(26,86,219,.15)' : 'none',
                     }}>
-                      {v}{i===4 && <Box component="span" sx={{ width: 2, height: 22, bgcolor: '#1A56DB', animation: 'caret 1s infinite', '@keyframes caret': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0 } } }} />}
+                      {v}{i===4 && <Box component="span" sx={{ width: 2, height: 22, bgcolor: '#1A56DB', display: 'inline-block', animation: 'caret 1s infinite', '@keyframes caret': { '0%,100%': { opacity: 1 }, '50%': { opacity: 0 } } }} />}
                     </Box>
                   ))}
                 </Box>
@@ -392,11 +356,9 @@ export default function ProfilePage() {
                       <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Recovery codes</Typography>
                       <Typography sx={{ fontSize: 11, color: '#6B7384' }}>10 single-use codes if you lose your device</Typography>
                     </Box>
-                    <Button startIcon={<DownloadIcon sx={{ fontSize: 14 }} />} sx={{ fontSize: 12, fontWeight: 600, color: '#1A56DB' }}>
-                      Download
-                    </Button>
+                    <Button startIcon={<DownloadIcon sx={{ fontSize: 14 }} />} sx={{ fontSize: 12, fontWeight: 600, color: '#1A56DB' }}>Download</Button>
                   </Box>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: 12, fontWeight: 600, mt: '10px' }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', mt: '10px' }}>
                     {RECOVERY_CODES.map((c,i) => (
                       <Box key={i} sx={{ p: '4px 8px', bgcolor: '#fff', border: '1px solid #E1E4EB', borderRadius: '4px', letterSpacing: '0.04em', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
                         {c}
@@ -413,7 +375,7 @@ export default function ProfilePage() {
               Email OTP sends a 6-digit code to <strong style={{ color: '#131722' }}>jordan.doe@acmecorp.com</strong> at each sign-in. This is your backup method.
             </Typography>
           )}
-        </PanelBody>
+        </Box>
       </Panel>
     </Box>
   );
